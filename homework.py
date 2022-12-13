@@ -8,6 +8,11 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+from exceptions import (TelegramError,
+                        EmptyAPIResponseError,
+                        WrongAPIResponseCodeError)
+
+
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,34 +35,24 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
-    if all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
-        return True
-
-    environment_variables = [
-        ('PRACTICUM_TOKEN', PRACTICUM_TOKEN),
-        ('TELEGRAM_TOKEN', TELEGRAM_TOKEN),
-        ('TELEGRAM_CHAT_ID', TELEGRAM_CHAT_ID),
-    ]
-    for name, env in environment_variables:
-        if not env:
-            logging.critical(f'Отсутствует переменная окружения: '
-                             f'{name} Программа принудительно остановлена.')
-    return False
+    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
+    # return globals()[PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
+    # тут пока не дошло как сделать правильно
 
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-        logging.info(f'Сообщение в чат {TELEGRAM_CHAT_ID}: {message}')
-        raise logging.debug(f'Получен новый статус домашней работы: {message}')
     except Exception:
         logging.error('Ошибка отправки сообщения в телеграм')
+        raise TelegramError(f'Получен новый статус домашней работы: {message}')
+    else:
+        logging.debug(f'Сообщение в чат {TELEGRAM_CHAT_ID}: {message}')
 
 
 def get_api_answer(timestamp):
     """Делает запрос к единственному эндпоинту API-сервиса."""
-    timestamp = timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
         homework_statuses = requests.get(
@@ -65,15 +60,15 @@ def get_api_answer(timestamp):
             headers=HEADERS,
             params=params
         )
-    except Exception as error:
-        raise Exception(f'Ошибка запроса к API: {error}')
+    except requests.RequestException as error:
+        raise EmptyAPIResponseError(f'Ошибка запроса к API: {error}')
     if homework_statuses.status_code != HTTPStatus.OK:
         status_code = homework_statuses.status_code
-        raise Exception(f'Ошибка {status_code}')
+        raise WrongAPIResponseCodeError(f'Ошибка {status_code}')
     try:
         return homework_statuses.json()
-    except ValueError:
-        raise ValueError('Ошибка полученной информации из json')
+    except requests.exceptions.JSONDecodeError:
+        raise Exception('Ошибка полученной информации из json')
 
 
 def check_response(response):
@@ -84,8 +79,8 @@ def check_response(response):
         raise KeyError('Ошибка словаря по ключу "homeworks"')
     if not isinstance(response['homeworks'], list):
         raise TypeError('Ответ API по ключу "homeworks" не список')
-    if response.get('homeworks'):
-        return response
+    if not response.get('current_date'):
+        raise KeyError('Ошибка словаря по ключу "current_date"')
 
 
 def parse_status(homework):
@@ -108,7 +103,7 @@ def main():
     timestamp = int(time.time())
     if not check_tokens():
         logging.critical('Как минимум, одна переменная окружения отсутствует')
-        sys.exit()
+        raise SystemExit(1)
 
     while True:
         try:
@@ -120,11 +115,14 @@ def main():
                 homework = homeworks[0]
                 message = parse_status(homework)
                 send_message(bot, message)
-            time.sleep(RETRY_PERIOD)
-
+        except TelegramError as error:
+            logging.error(f'Что то сломалось при отправке, {error}',
+                          exc_info=True)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-        time.sleep(RETRY_PERIOD)
+            logger.error(message, exc_info=True)
+        finally:
+            time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':

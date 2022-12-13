@@ -6,7 +6,7 @@ class NotForSendingError(Exception):
 
 class TelegramError(NotForSendingError):
     """
-    Высылает, когда выслать в телеграм.
+    Вылетает, когда не получилось отправить в телеграм.
     НЕ шлём в телеграм.
     """
 
@@ -22,7 +22,7 @@ class EmptyAPIResponseError(NotForSendingError):
     pass
 
 
-class WrongAPIResponseCpdeError(Exception):
+class WrongAPIResponseCodeError(Exception):
     """Вылетает, когда ответ сервера !=200. ШЛЁМ в телеграм."""
 
     pass
