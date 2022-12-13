@@ -81,6 +81,7 @@ def check_response(response):
         raise TypeError('Ответ API по ключу "homeworks" не список')
     if not response.get('current_date'):
         raise KeyError('Ошибка словаря по ключу "current_date"')
+    return response
 
 
 def parse_status(homework):
