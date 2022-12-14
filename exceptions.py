@@ -4,7 +4,7 @@ class NotForSendingError(Exception):
     pass
 
 
-class TelegramError(NotForSendingError):
+class NotForTelegramError(NotForSendingError):
     """
     Вылетает, когда не получилось отправить в телеграм.
     НЕ шлём в телеграм.
@@ -30,5 +30,11 @@ class WrongAPIResponseCodeError(Exception):
 
 class ConnectionError(Exception):
     """Вылетает, когда произошла ошибка подключения к серверу."""
+
+    pass
+
+
+class StatusWorkError(EmptyAPIResponseError):
+    """Статус работы не известен."""
 
     pass

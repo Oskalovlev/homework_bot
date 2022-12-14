@@ -8,9 +8,10 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-from exceptions import (TelegramError,
+from exceptions import (NotForTelegramError,
                         EmptyAPIResponseError,
-                        WrongAPIResponseCodeError)
+                        WrongAPIResponseCodeError,
+                        StatusWorkError)
 
 
 load_dotenv()
@@ -44,11 +45,10 @@ def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except Exception:
-        logging.error('Ошибка отправки сообщения в телеграм')
-        raise TelegramError(f'Получен новый статус домашней работы: {message}')
+    except telegram.error.TelegramError as error:
+        logging.error(f'Ошибка отправки сообщения в телеграм {error}')
     else:
-        logging.debug(f'Сообщение в чат {TELEGRAM_CHAT_ID}: {message}')
+        logging.debug(f'Сообщение отправлено: {message}')
 
 
 def get_api_answer(timestamp):
@@ -60,15 +60,12 @@ def get_api_answer(timestamp):
             headers=HEADERS,
             params=params
         )
+        if homework_statuses.status_code != HTTPStatus.OK:
+            status_code = homework_statuses.status_code
+            raise WrongAPIResponseCodeError(f'Ошибка {status_code}')
+        return homework_statuses.json()
     except requests.RequestException as error:
         raise EmptyAPIResponseError(f'Ошибка запроса к API: {error}')
-    if homework_statuses.status_code != HTTPStatus.OK:
-        status_code = homework_statuses.status_code
-        raise WrongAPIResponseCodeError(f'Ошибка {status_code}')
-    try:
-        return homework_statuses.json()
-    except requests.exceptions.JSONDecodeError:
-        raise Exception('Ошибка полученной информации из json')
 
 
 def check_response(response):
@@ -77,10 +74,13 @@ def check_response(response):
         raise TypeError('Ответ API не словарь')
     if not response.get('homeworks'):
         raise KeyError('Ошибка словаря по ключу "homeworks"')
+        # Вылетает ошибка по ключу, не разобрался почему. Всё проходит.
     if not isinstance(response['homeworks'], list):
         raise TypeError('Ответ API по ключу "homeworks" не список')
     if not response.get('current_date'):
-        raise KeyError('Ошибка словаря по ключу "current_date"')
+        logging.debug('Ошибка по ключу "current_date"')
+    if not isinstance(response['current_date'], int):
+        raise TypeError('Ответ по ключу "current_date" не целое число')
     return response
 
 
@@ -89,11 +89,11 @@ def parse_status(homework):
     if 'homework_name' not in homework:
         raise KeyError('Отсутствует ключ "homework_name"')
     if 'status' not in homework:
-        raise Exception('Отсутствует ключ "status"')
+        raise KeyError('Отсутствует ключ "status"')
     homework_name = homework['homework_name']
     verdict = homework['status']
     if verdict not in HOMEWORK_VERDICTS:
-        raise Exception(f'Неизвестный статус работы: {verdict}')
+        raise StatusWorkError(f'Неизвестный статус работы: {verdict}')
     verdict = HOMEWORK_VERDICTS[verdict]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -116,12 +116,17 @@ def main():
                 homework = homeworks[0]
                 message = parse_status(homework)
                 send_message(bot, message)
-        except TelegramError as error:
+        except NotForTelegramError as error:
             logging.error(f'Что то сломалось при отправке, {error}',
                           exc_info=True)
+        except ValueError:
+            raise requests.exceptions.JSONDecodeError(
+                'Ошибка полученной информации из json'
+            )
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message, exc_info=True)
+            send_message(bot, message)
         finally:
             time.sleep(RETRY_PERIOD)
 
