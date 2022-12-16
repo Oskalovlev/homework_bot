@@ -13,7 +13,7 @@ class NotForTelegramError(NotForSendingError):
     pass
 
 
-class EmptyAPIResponseError(NotForSendingError):
+class APIRequestError(NotForSendingError):
     """
     Вылетает, когда нет домашней работы или timestamp.
     НЕ шлём в телеграм.
@@ -34,7 +34,7 @@ class ConnectionError(Exception):
     pass
 
 
-class StatusWorkError(EmptyAPIResponseError):
+class StatusWorkError(APIRequestError):
     """Статус работы не известен."""
 
     pass

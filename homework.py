@@ -8,8 +8,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-from exceptions import (NotForTelegramError,
-                        EmptyAPIResponseError,
+from exceptions import (APIRequestError,
                         WrongAPIResponseCodeError,
                         StatusWorkError)
 
@@ -38,7 +37,14 @@ def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
     # return globals()[PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    # тут пока не дошло как сделать правильно
+    # Как проверить что с токеном что-то не то?
+    # На отсутствие токена в main есть ведь проверка
+    # for item in (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID):
+    #     if not globals()[item]:
+    #         logging.critical(
+    #             f'Нет обязательной переменной окружения: {item}'
+    #         )
+    #     return item
 
 
 def send_message(bot, message):
@@ -61,11 +67,16 @@ def get_api_answer(timestamp):
             params=params
         )
         if homework_statuses.status_code != HTTPStatus.OK:
-            status_code = homework_statuses.status_code
-            raise WrongAPIResponseCodeError(f'Ошибка {status_code}')
+            raise WrongAPIResponseCodeError(
+                f'Ошибка ответа API. Статус: {homework_statuses.status_code}'
+            )
         return homework_statuses.json()
     except requests.RequestException as error:
-        raise EmptyAPIResponseError(f'Ошибка запроса к API: {error}')
+        raise APIRequestError(f'Ошибка запроса к API: {error}')
+    except ValueError:
+        raise requests.exceptions.JSONDecodeError(
+            'Ошибка полученной информации из json'
+        )
 
 
 def check_response(response):
@@ -74,13 +85,14 @@ def check_response(response):
         raise TypeError('Ответ API не словарь')
     if not response.get('homeworks'):
         raise KeyError('Ошибка словаря по ключу "homeworks"')
-        # Вылетает ошибка по ключу, не разобрался почему. Всё проходит.
+        # Вылетает ошибка- Сбой в работе программы:
+        # 'Ошибка словаря по ключу "homeworks"'
     if not isinstance(response['homeworks'], list):
         raise TypeError('Ответ API по ключу "homeworks" не список')
     if not response.get('current_date'):
-        logging.debug('Ошибка по ключу "current_date"')
+        logging.error('Ошибка по ключу "current_date"')
     if not isinstance(response['current_date'], int):
-        raise TypeError('Ответ по ключу "current_date" не целое число')
+        logging.error('Ответ по ключу "current_date" не целое число')
     return response
 
 
@@ -116,14 +128,9 @@ def main():
                 homework = homeworks[0]
                 message = parse_status(homework)
                 send_message(bot, message)
-        except NotForTelegramError as error:
+        except Exception as error:
             logging.error(f'Что то сломалось при отправке, {error}',
                           exc_info=True)
-        except ValueError:
-            raise requests.exceptions.JSONDecodeError(
-                'Ошибка полученной информации из json'
-            )
-        except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message, exc_info=True)
             send_message(bot, message)
