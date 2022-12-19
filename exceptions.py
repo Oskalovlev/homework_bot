@@ -38,3 +38,15 @@ class StatusWorkError(APIRequestError):
     """Статус работы не известен."""
 
     pass
+
+
+class JSONError(Exception):
+    """Ошибка в json."""
+
+    pass
+
+
+class PromlemKey(TypeError):
+    """Ошибка ключа."""
+
+    pass

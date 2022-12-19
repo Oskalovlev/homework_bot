@@ -7,10 +7,12 @@ from http import HTTPStatus
 import requests
 import telegram
 from dotenv import load_dotenv
-
+from json.decoder import JSONDecodeError
 from exceptions import (APIRequestError,
                         WrongAPIResponseCodeError,
-                        StatusWorkError)
+                        StatusWorkError,
+                        JSONError,
+                        PromlemKey)
 
 
 load_dotenv()
@@ -36,15 +38,16 @@ HOMEWORK_VERDICTS = {
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
-    # return globals()[PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    # Как проверить что с токеном что-то не то?
-    # На отсутствие токена в main есть ведь проверка
+    # Почему то не проходит, пишет ошибку
+    # KeyError: 'sometoken'
     # for item in (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID):
     #     if not globals()[item]:
     #         logging.critical(
     #             f'Нет обязательной переменной окружения: {item}'
     #         )
-    #     return item
+    #         return False
+    #     else:
+    #         return True
 
 
 def send_message(bot, message):
@@ -73,10 +76,8 @@ def get_api_answer(timestamp):
         return homework_statuses.json()
     except requests.RequestException as error:
         raise APIRequestError(f'Ошибка запроса к API: {error}')
-    except ValueError:
-        raise requests.exceptions.JSONDecodeError(
-            'Ошибка полученной информации из json'
-        )
+    except JSONDecodeError as error:
+        raise JSONError() from error
 
 
 def check_response(response):
@@ -85,14 +86,12 @@ def check_response(response):
         raise TypeError('Ответ API не словарь')
     if not response.get('homeworks'):
         raise KeyError('Ошибка словаря по ключу "homeworks"')
-        # Вылетает ошибка- Сбой в работе программы:
-        # 'Ошибка словаря по ключу "homeworks"'
     if not isinstance(response['homeworks'], list):
         raise TypeError('Ответ API по ключу "homeworks" не список')
     if not response.get('current_date'):
-        logging.error('Ошибка по ключу "current_date"')
+        raise PromlemKey('Ошибка по ключу "current_date"')
     if not isinstance(response['current_date'], int):
-        logging.error('Ответ по ключу "current_date" не целое число')
+        raise PromlemKey('Ответ по ключу "current_date" не целое число')
     return response
 
 
@@ -128,11 +127,10 @@ def main():
                 homework = homeworks[0]
                 message = parse_status(homework)
                 send_message(bot, message)
+        except PromlemKey:
+            logging.error('Ошибка по ключу "current_date"')
         except Exception as error:
-            logging.error(f'Что то сломалось при отправке, {error}',
-                          exc_info=True)
-            message = f'Сбой в работе программы: {error}'
-            logger.error(message, exc_info=True)
+            logging.error(f'Что то сломалось при отправке, {error}')
             send_message(bot, message)
         finally:
             time.sleep(RETRY_PERIOD)
