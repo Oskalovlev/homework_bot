@@ -7,12 +7,12 @@ from http import HTTPStatus
 import requests
 import telegram
 from dotenv import load_dotenv
-from json.decoder import JSONDecodeError
+# from json.decoder import JSONDecodeError
 from exceptions import (APIRequestError,
                         WrongAPIResponseCodeError,
                         StatusWorkError,
                         JSONError,
-                        PromlemKey)
+                        ProblemKey)
 
 
 load_dotenv()
@@ -74,10 +74,10 @@ def get_api_answer(timestamp):
                 f'Ошибка ответа API. Статус: {homework_statuses.status_code}'
             )
         return homework_statuses.json()
+    except requests.exceptions.JSONDecodeError as error:
+        raise JSONError(f'Ошибка полученной информации из json: {error}')
     except requests.RequestException as error:
         raise APIRequestError(f'Ошибка запроса к API: {error}')
-    except JSONDecodeError as error:
-        raise JSONError() from error
 
 
 def check_response(response):
@@ -89,9 +89,9 @@ def check_response(response):
     if not isinstance(response['homeworks'], list):
         raise TypeError('Ответ API по ключу "homeworks" не список')
     if not response.get('current_date'):
-        raise PromlemKey('Ошибка по ключу "current_date"')
+        raise ProblemKey('Ошибка по ключу "current_date"')
     if not isinstance(response['current_date'], int):
-        raise PromlemKey('Ответ по ключу "current_date" не целое число')
+        raise ProblemKey('Ответ по ключу "current_date" не целое число')
     return response
 
 
@@ -127,7 +127,7 @@ def main():
                 homework = homeworks[0]
                 message = parse_status(homework)
                 send_message(bot, message)
-        except PromlemKey:
+        except ProblemKey:
             logging.error('Ошибка по ключу "current_date"')
         except Exception as error:
             logging.error(f'Что то сломалось при отправке, {error}')

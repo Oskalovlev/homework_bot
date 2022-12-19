@@ -46,7 +46,7 @@ class JSONError(Exception):
     pass
 
 
-class PromlemKey(TypeError):
+class ProblemKey(TypeError):
     """Ошибка ключа."""
 
     pass
