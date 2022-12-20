@@ -7,7 +7,6 @@ from http import HTTPStatus
 import requests
 import telegram
 from dotenv import load_dotenv
-# from json.decoder import JSONDecodeError
 from exceptions import (APIRequestError,
                         WrongAPIResponseCodeError,
                         StatusWorkError,
@@ -37,17 +36,14 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
-    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
-    # Почему то не проходит, пишет ошибку
-    # KeyError: 'sometoken'
-    # for item in (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID):
-    #     if not globals()[item]:
-    #         logging.critical(
-    #             f'Нет обязательной переменной окружения: {item}'
-    #         )
-    #         return False
-    #     else:
-    #         return True
+    for item in ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID'):
+        if not globals()[item]:
+            logging.critical(
+                f'Нет обязательной переменной окружения: {item}'
+            )
+            return False
+        else:
+            return True
 
 
 def send_message(bot, message):
@@ -62,12 +58,11 @@ def send_message(bot, message):
 
 def get_api_answer(timestamp):
     """Делает запрос к единственному эндпоинту API-сервиса."""
-    params = {'from_date': timestamp}
     try:
         homework_statuses = requests.get(
             ENDPOINT,
             headers=HEADERS,
-            params=params
+            params={'from_date': timestamp}
         )
         if homework_statuses.status_code != HTTPStatus.OK:
             raise WrongAPIResponseCodeError(

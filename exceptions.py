@@ -4,15 +4,6 @@ class NotForSendingError(Exception):
     pass
 
 
-class NotForTelegramError(NotForSendingError):
-    """
-    Вылетает, когда не получилось отправить в телеграм.
-    НЕ шлём в телеграм.
-    """
-
-    pass
-
-
 class APIRequestError(NotForSendingError):
     """
     Вылетает, когда нет домашней работы или timestamp.
@@ -24,12 +15,6 @@ class APIRequestError(NotForSendingError):
 
 class WrongAPIResponseCodeError(Exception):
     """Вылетает, когда ответ сервера !=200. ШЛЁМ в телеграм."""
-
-    pass
-
-
-class ConnectionError(Exception):
-    """Вылетает, когда произошла ошибка подключения к серверу."""
 
     pass
 
