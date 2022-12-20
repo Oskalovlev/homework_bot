@@ -7,12 +7,9 @@ from http import HTTPStatus
 import requests
 import telegram
 from dotenv import load_dotenv
-from exceptions import (APIRequestError,
-                        WrongAPIResponseCodeError,
-                        StatusWorkError,
-                        JSONError,
-                        ProblemKey)
 
+from exceptions import (APIRequestError, JSONError, ProblemKey,
+                        StatusWorkError, WrongAPIResponseCodeError)
 
 load_dotenv()
 
@@ -42,8 +39,7 @@ def check_tokens() -> bool:
                 f'Нет обязательной переменной окружения: {item}'
             )
             return False
-        else:
-            return True
+        return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
 def send_message(bot, message):
