@@ -40,7 +40,7 @@ def check_tokens() -> bool:
         else:
             return True
         logging.critical(
-            f'Нет обязательной переменной окружения: {missing_tokens}'
+            f'Нет обязательной/ых переменной/ых окружения: {missing_tokens}'
         )
         return False
 
