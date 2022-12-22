@@ -33,16 +33,17 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
+    missing_tokens = []
     for item in ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID'):
-        missing_tokens = []
         if not globals()[item]:
             missing_tokens.append(item)
-        else:
-            return True
         logging.critical(
             f'Нет обязательной/ых переменной/ых окружения: {missing_tokens}'
         )
-        return False
+        if not missing_tokens:
+            return True
+        else:
+            return False
 
 
 def send_message(bot, message):
