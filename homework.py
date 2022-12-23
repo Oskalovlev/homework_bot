@@ -37,13 +37,11 @@ def check_tokens() -> bool:
     for item in ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID'):
         if not globals()[item]:
             missing_tokens.append(item)
-        logging.critical(
-            f'Нет обязательной/ых переменной/ых окружения: {missing_tokens}'
-        )
-        if not missing_tokens:
-            return True
-        else:
-            return False
+    logging.critical(
+        f'Нет обязательной/ых переменной/ых окружения: {missing_tokens}'
+    )
+    if not missing_tokens:
+        return True
 
 
 def send_message(bot, message):
