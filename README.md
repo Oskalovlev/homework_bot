@@ -1,4 +1,4 @@
-#YPHW bot
+#Homework bot
 A simple telegram bot that informs me (as a student) about the status of my homework.
 
 ###Overview
@@ -6,7 +6,7 @@ The bot can interact with the Yandex.Praсtiсum website API and the Telegram me
 
 ###Technologies
 ```sh
-Python 3.8.5
+Python 3.7.9
 ```
 Installation and launch
 IMPORTANT NOTE!
