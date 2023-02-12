@@ -1,15 +1,16 @@
-#Homework bot
-A simple telegram bot that informs me (as a student) about the status of my homework.
+# Homework bot.
+Простой телеграмм-бот, который информирует меня (как студента) о статусе моей домашней работы.
 
-###Overview
-The bot can interact with the Yandex.Praсtiсum website API and the Telegram messenger API. Thus, if there is a request to the bot and there is a response on the status of homework, the bot will send a result text message to the appropriate chat.
+### Обзор
+Бот может взаимодействовать с API сайта Яндекс.Практикум и API мессенджера Telegram. Таким образом, если есть запрос к боту и есть ответ о статусе домашнего задания, бот отправит текстовое сообщение о результате в соответствующий чат.
 
-###Technologies
+### Технологии
 ```sh
 Python 3.7.9
 ```
-Installation and launch
-IMPORTANT NOTE!
+### Установка и запуск
+
+ВАЖНАЯ ЗАМЕТКА!
 
 This bot is designed to work specifically with my homework, so if you want to test the bot in practice, then you firtsly need to do the following:
 
@@ -24,14 +25,14 @@ cd homework_bot
 ```
 Create and activate a virtual environment:
 
-##Windows:
+## Windows:
 
 ```sh
 py -3 -m venv env
 . venv/Scripts/activate 
 py -m pip install --upgrade pip
 ```
-###macOS/Linux:
+### macOS/Linux:
 
 ```sh
 python3 -m venv .venv
@@ -39,23 +40,21 @@ source env/bin/activate
 python3 -m pip install --upgrade pip
 ```
 
-##Install dependencies from a file requirements.txt:
+## Install dependencies from a file requirements.txt:
 
 ```sh
 pip install -r requirements.txt
 ```
 
-##Launch:
+### Launch:
 
-##Windows:
+## Windows:
 
 ```sh
 py homework.py 
 ```
-##macOS/Linux:
+## macOS/Linux:
 
 ```sh
 python3 homework.py 
 ```
-License
-MIT
