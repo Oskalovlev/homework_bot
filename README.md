@@ -5,56 +5,59 @@
 Бот может взаимодействовать с API сайта Яндекс.Практикум и API мессенджера Telegram. Таким образом, если есть запрос к боту и есть ответ о статусе домашнего задания, бот отправит текстовое сообщение о результате в соответствующий чат.
 
 ### Технологии
+
 ```sh
 Python 3.7.9
 ```
+
 ### Установка и запуск
 
-ВАЖНАЯ ЗАМЕТКА!
+## ВАЖНАЯ ЗАМЕТКА!
 
-This bot is designed to work specifically with my homework, so if you want to test the bot in practice, then you firtsly need to do the following:
+Этот бот предназначен для работы именно с моими домашними заданиями, поэтому если вы хотите протестировать бота на практике, то вам в первую очередь нужно сделать следующее:
+```sh
+-создай своего бота через @botfather и получи токен
+-получить собственный токен через сайт Яндекс.Практикум (вы должны быть студентом)
+-поместите данные в переменные PRACTICUM_TOKEN, TELEGRAM_TOKEN и TELEGRAM_CHAT_ID
+```
 
-create your own bot via @botfather and get a token
-receive your own token via Yandex.Practicum website (you have to be the student)
-put the data in the variables PRACTICUM_TOKEN, TELEGRAM_TOKEN and TELEGRAM_CHAT_ID
-Clone the repository and go to it using the command line:
+## Клонируем репозиторий и переходим к нему с помощью командной строки:
 
 ```sh
 git clone 
 cd homework_bot
 ```
-Create and activate a virtual environment:
+
+### Создайте и активируйте виртуальную среду:
 
 ## Windows:
-
 ```sh
 py -3 -m venv env
 . venv/Scripts/activate 
 py -m pip install --upgrade pip
 ```
-### macOS/Linux:
 
+### macOS/Linux:
 ```sh
 python3 -m venv .venv
 source env/bin/activate
 python3 -m pip install --upgrade pip
 ```
 
-## Install dependencies from a file requirements.txt:
+## Установите зависимости из файла requirements.txt:
 
 ```sh
 pip install -r requirements.txt
 ```
 
-### Launch:
+### Запуск:
 
 ## Windows:
-
 ```sh
 py homework.py 
 ```
-## macOS/Linux:
 
+## macOS/Linux:
 ```sh
 python3 homework.py 
 ```
