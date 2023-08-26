@@ -13,45 +13,67 @@ Python 3.7.9
 ## Установка и запуск
 
 ### ВАЖНАЯ ЗАМЕТКА!
-Этот бот предназначен для работы именно с моими домашними заданиями, поэтому если вы хотите протестировать бота на практике, то вам в первую очередь нужно сделать следующее:
-#### - создай своего бота через @botfather и получи токен
-#### - получить собственный токен через сайт [Яндекс.Практикум](https://practicum.yandex.ru/) (вы должны быть студентом)
-#### - поместите данные в переменные PRACTICUM_TOKEN, TELEGRAM_TOKEN и TELEGRAM_CHAT_ID
+##### Этот бот предназначен для работы именно с моими домашними заданиями, поэтому если вы хотите протестировать бота на практике, то вам нужно сделать следующее:
+```sh
+* создай своего бота через @botfather и получи токен
+* получить собственный токен через сайт [Яндекс.Практикум](https://practicum.yandex.ru/) (вы должны быть студентом)
+* поместите данные в созданный вами .env файл
+```
 
-## Клонируем репозиторий и переходим к нему с помощью командной строки:
+### Клонируем репозиторий и переходим к нему с помощью командной строки:
 
 ```sh
-git clone 
+git clone https://github.com/Oskalovlev/homework_bot.git
+```
+```
 cd homework_bot
 ```
 
-## Создайте и активируйте виртуальную среду:
+### Cоздать и активировать виртуальное окружение:
 
-### Windows:
-```sh
-py -3 -m venv env
-. venv/Scripts/activate 
-py -m pip install --upgrade pip
+```
+python -m venv venv
 ```
 
-### macOS/Linux:
-```sh
-python3 -m venv .venv
-source env/bin/activate
-python3 -m pip install --upgrade pip
+* Если у вас Linux/macOS
+
+    ```
+    source venv/bin/activate
+    ```
+
+* Если у вас windows
+
+    ```
+    source venv/scripts/activate
+    ```
+
+### Установить зависимости из файла requirements.txt:
+
+```
+python -m pip install --upgrade pip
 ```
 
-## Установите зависимости из файла requirements.txt:
-
-```sh
+```
 pip install -r requirements.txt
+```
+
+### Создать .env:
+```
+touch .env
+```
+
+### Заполните .env:
+```sh
+PRACTICUM_TOKEN=
+TELEGRAM_TOKEN=
+TELEGRAM_CHAT_ID=
 ```
 
 ## Запуск:
 
 ### Windows:
 ```sh
-py homework.py 
+python homework.py 
 ```
 
 ### macOS/Linux:
@@ -59,5 +81,5 @@ py homework.py
 python3 homework.py 
 ```
 
-## License
-### MIT
+### Автор 
+#### Оскалов Лев
